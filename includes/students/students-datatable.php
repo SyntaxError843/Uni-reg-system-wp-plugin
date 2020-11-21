@@ -1,5 +1,7 @@
 <?php
 
+require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
 function create_students_datatable() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'students';
@@ -18,12 +20,16 @@ function create_students_datatable() {
             PRIMARY KEY (id)
         )";
 
-    $wpdb->query( $sql );
+    maybe_create_table( $table_name, $sql );
 }
 
 function drop_students_datatable() {
     global $wpdb;
     $table_name = $wpdb->prefix . 'students';
-    $sql = "DROP TABLE IF EXISTS $table_name";
-    $wpdb->query( $sql ); 
+    $sql = "DROP TABLE $table_name CASCADE";
+    $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table_name ) );
+ 
+    if ( $wpdb->get_var( $query ) === $table_name ) {
+        $wpdb->query( $sql );
+    }
 }

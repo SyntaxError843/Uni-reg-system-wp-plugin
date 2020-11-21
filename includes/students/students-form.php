@@ -1,22 +1,10 @@
 <?php
 
-// Student fetch if available
-function get_student_if_updating() {
-    $result = '';
-
-    if( isset( $_GET['student_id'] ) && $_GET['student_id'] !== '' ) {
-        // echo "<script>console.log('ass');</script>";
-        global $wpdb;
-
-        $table_name = $wpdb->prefix . 'students';
-        $sql = $wpdb->prepare( "SELECT * FROM `$table_name` WHERE id = %d", (int) $_GET['student_id'] );
-        $result = $wpdb->get_row( $sql );
-    }
-
-    return $result;
-}
-
-// Student form html
+/**
+ * 
+ * Student Form HTML
+ * 
+ */
 function student_form_html() {
     $result = get_student_if_updating();
 
@@ -52,7 +40,7 @@ function student_form_html() {
 
         if( $result ) {
             ?>
-                <h1>Edit Student</h1><?php echo '<h3>' . $result->first_name . ' ' . $result->last_name . '</h3>' ?>
+                <h1>Edit Student</h1><h3><?php echo $result->first_name . ' ' . $result->last_name ?></h3>
             <?php
         } else {
             ?>
@@ -219,7 +207,33 @@ function student_form_html() {
     <?php
 }
 
-// Validate student form
+/**
+ * 
+ * Student Form Logic
+ * 
+ */
+
+/**
+ * Student fetch if available
+ */
+function get_student_if_updating() {
+    $result = '';
+
+    if( isset( $_GET['student_id'] ) && $_GET['student_id'] !== '' ) {
+        // echo "<script>console.log('ass');</script>";
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . 'students';
+        $sql = $wpdb->prepare( "SELECT * FROM `$table_name` WHERE id = %d", (int) $_GET['student_id'] );
+        $result = $wpdb->get_row( $sql );
+    }
+
+    return $result;
+}
+
+/**
+ * Validate student form
+ */
 function validate_student_form()
     {        
         $errors = new WP_Error();
@@ -249,13 +263,17 @@ function validate_student_form()
        return $errors;
     }
 
-// Sanitize student text form fields
-function sanitize_form_text_field($input)
+/**
+ * Sanitize student text fields
+ */
+function sanitize_student_form_text_field($input)
     {
         return trim(stripslashes(sanitize_text_field($input)));
     }
 
-// Form succsess message
+/**
+ * Form output messages
+ */
 function student_form_message()
     {
         global $errors;
@@ -269,10 +287,10 @@ function student_form_message()
                 </div>
             <?php
 
-        /**
-         * Empty POST array
-         */
-        $_POST = '';
+            /**
+             * Empty POST array
+             */
+            $_POST = '';
 
         } else {
             if (is_wp_error($errors) && !empty($errors->errors)) {
@@ -290,9 +308,11 @@ function student_form_message()
         }
     }
 
-// Student record insert after passing validation
-add_action('init', 'add_student_or_update_if_exists');
-function add_student_or_update_if_exists() {
+/**
+ * Student form POST requests handling
+ */
+add_action('init', 'handle_student_form_post_requests');
+function handle_student_form_post_requests() {
     if ( isset( $_POST['student-form-submit'] ) ) {
 
         global $errors;
@@ -305,16 +325,16 @@ function add_student_or_update_if_exists() {
         if ( empty($errors->errors) ) {
 
             $args = array(
-                'first_name' => ucfirst(sanitize_form_text_field($_POST['first_name'])),
-                'father_name' => ucfirst(sanitize_form_text_field($_POST['father_name'])),
-                'last_name' => ucfirst(sanitize_form_text_field($_POST['last_name'])),
-                'phone_number' => sanitize_form_text_field($_POST['phone_number']),
+                'first_name' => ucfirst(sanitize_student_form_text_field($_POST['first_name'])),
+                'father_name' => ucfirst(sanitize_student_form_text_field($_POST['father_name'])),
+                'last_name' => ucfirst(sanitize_student_form_text_field($_POST['last_name'])),
+                'phone_number' => sanitize_student_form_text_field($_POST['phone_number']),
                 'email' => sanitize_email($_POST['email']),
                 'date_of_birth' => $_POST['date_of_birth'],
                 );
 
             if ( ! $result ) {
-                $args['student_code'] = sanitize_form_text_field($_POST['student_code']);
+                $args['student_code'] = sanitize_student_form_text_field($_POST['student_code']);
                 $args['student_password'] = wp_hash_password($_POST['student_password']);
                 
                 $default = array(
