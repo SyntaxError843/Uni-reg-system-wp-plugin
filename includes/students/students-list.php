@@ -40,10 +40,12 @@ function students_list_html() {
                             <tr>
                                 <th id="cb" class="manage-column column-cb check-column" scope="col"></th>
                                 <th id="full-name" class="manage-column column-full-name" scope="col">Student Name</th>
+                                <th id="student-code" class="manage-column column-student-code" scope="col">Student Code</th>
                                 <th id="phone-number" class="manage-column column-phone-number" scope="col">Phone Number</th>
                                 <th id="email" class="manage-column column-email" scope="col">Email</th>
                                 <th id="student-password" class="manage-column column-student-password" scope="col">Password Hash</th>
                                 <th id="date-of-birth" class="manage-column column-date-of-birth" scope="col">Date of Birth</th>
+                                <th id="date-of-birth" class="manage-column column-date-created" scope="col">Date Created</th>
                             </tr>   
                         </thead>
 
@@ -61,10 +63,12 @@ function students_list_html() {
                                                 <span class="delete"><a class="submitdelete" href="<?php echo '?page=student_form&action=delete&student_id=' . $result->id ?>">Delete</a></span>
                                             </div>
                                         </td>
+                                        <td class="column-student-code"><?php echo $result->student_code; ?></td>
                                         <td class="column-phone-number"><?php echo $result->phone_number; ?></td>
                                         <td class="column-email"><?php echo $result->email; ?></td>
                                         <td class="column-student-password"><?php echo $result->student_password; ?></td>
                                         <td class="column-date-of-birth"><?php echo $result->date_of_birth; ?></td>
+                                        <td class="column-date-created"><?php echo $result->date_created; ?></td>
                                     </tr>
 
                                     <?php 
