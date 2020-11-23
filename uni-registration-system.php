@@ -42,7 +42,7 @@ function uni_reg_system_create_db() {
 }
 
 // drop the data tables from the database on uninstall
-register_deactivation_hook(__FILE__, 'uni_reg_system_drop_db');
+register_uninstall_hook(__FILE__, 'uni_reg_system_drop_db');
 function uni_reg_system_drop_db() {
     drop_registrations_datatable();
     drop_students_datatable(); 
