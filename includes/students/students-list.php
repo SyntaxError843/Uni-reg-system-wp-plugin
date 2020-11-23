@@ -32,7 +32,7 @@ function students_list_html() {
         <p>
             <?php
 
-            if( count($results) > 0 ) {
+            if( $results ) {
                 ?> 
 
                     <table class="widefat fixed" cellspacing="0">
@@ -59,8 +59,8 @@ function students_list_html() {
                                         <td class="column-full-name">
                                             <strong><?php echo $result->first_name . ' ' . $result->father_name[0] . '. ' . $result->last_name;?></strong>
                                             <div class="row-actions">
-                                                <span class="edit"><a href="<?php echo '?page=student_form&student_id=' . $result->id ?>">Edit</a> |</span>
-                                                <span class="delete"><a class="submitdelete" href="<?php echo '?page=student_form&action=delete&student_id=' . $result->id ?>">Delete</a></span>
+                                                <span class="edit"><a href="<?php echo '?page=student_form&id=' . $result->id ?>">Edit</a> |</span>
+                                                <span class="delete"><a class="submitdelete" href="<?php echo '?page=student_form&action=delete&id=' . $result->id ?>">Delete</a></span>
                                             </div>
                                         </td>
                                         <td class="column-student-code"><?php echo $result->student_code; ?></td>

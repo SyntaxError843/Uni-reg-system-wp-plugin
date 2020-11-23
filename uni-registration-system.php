@@ -27,6 +27,10 @@ require_once UNIREGSYS_DIR . 'includes/courses/courses-datatable.php';
 require_once UNIREGSYS_DIR . 'includes/courses/courses-list.php';
 require_once UNIREGSYS_DIR . 'includes/courses/courses-form.php';
 
+require_once UNIREGSYS_DIR . 'includes/registrations/registrations-datatable.php';
+require_once UNIREGSYS_DIR . 'includes/registrations/registrations-list.php';
+require_once UNIREGSYS_DIR . 'includes/registrations/registrations-form.php';
+
 require_once UNIREGSYS_DIR . 'includes/scripts.php';
 
 // Create the data tables in the database on activate
@@ -34,11 +38,13 @@ register_activation_hook(__FILE__, 'uni_reg_system_create_db');
 function uni_reg_system_create_db() {
     create_students_datatable();
     create_courses_datatable();
+    create_registrations_datatable();
 }
 
 // drop the data tables from the database on uninstall
-register_uninstall_hook(__FILE__, 'uni_reg_system_drop_db');
+register_deactivation_hook(__FILE__, 'uni_reg_system_drop_db');
 function uni_reg_system_drop_db() {
+    drop_registrations_datatable();
     drop_students_datatable(); 
     drop_courses_datatable(); 
 }
@@ -46,16 +52,24 @@ function uni_reg_system_drop_db() {
 add_action( 'admin_menu', 'uni_reg_system_admin_main_menu' );
 function uni_reg_system_admin_main_menu() {
     add_menu_page(
-        __( 'Uni Registrations' ),
-        __( 'Uni Registrations' ),
+        __( 'Course Registrations' ),
+        __( 'Course Registrations' ),
         'edit_posts',
-        'uni_reg_system',
+        'registrations_list',
         'uni_reg_system_registrations_list_handler',
         'dashicons-welcome-learn-more',
         6
     );
     add_submenu_page(
-        'uni_reg_system',
+        'registrations_list',
+        __( 'Add Registration' ),
+        __( 'Add Registration' ),
+        'edit_posts',
+        'registration_form',
+        'uni_reg_system_registrations_form_handler'
+    );
+    add_submenu_page(
+        'registrations_list',
         __( 'Students' ),
         __( 'Students' ),
         'edit_posts',
@@ -63,7 +77,7 @@ function uni_reg_system_admin_main_menu() {
         'uni_reg_system_students_list_handler'
     );
     add_submenu_page(
-        'uni_reg_system',
+        'registrations_list',
         __( 'Add Student' ),
         __( 'Add Student' ),
         'edit_posts',
@@ -71,7 +85,7 @@ function uni_reg_system_admin_main_menu() {
         'uni_reg_system_student_form_handler'
     );
     add_submenu_page(
-        'uni_reg_system',
+        'registrations_list',
         __( 'Courses' ),
         __( 'Courses' ),
         'edit_posts',
@@ -79,7 +93,7 @@ function uni_reg_system_admin_main_menu() {
         'uni_reg_system_courses_list_handler'
     );
     add_submenu_page(
-        'uni_reg_system',
+        'registrations_list',
         __( 'Add Course' ),
         __( 'Add Course' ),
         'edit_posts',
@@ -89,7 +103,11 @@ function uni_reg_system_admin_main_menu() {
 }
 
 function uni_reg_system_registrations_list_handler() {
-    echo 'ass';
+    registrations_list_html();
+}
+
+function uni_reg_system_registrations_form_handler() {
+    registration_form_html();
 }
 
 function uni_reg_system_students_list_handler() {

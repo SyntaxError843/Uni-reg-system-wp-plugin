@@ -54,8 +54,8 @@ function courses_list_html() {
                                         <td class="column-course-name">
                                             <strong><?php echo $result->course_name?></strong>
                                             <div class="row-actions">
-                                                <span class="edit"><a href="<?php echo '?page=course_form&course_id=' . $result->id ?>">Edit</a> |</span>
-                                                <span class="delete"><a class="submitdelete" href="<?php echo '?page=course_form&action=delete&course_id=' . $result->id ?>">Delete</a></span>
+                                                <span class="edit"><a href="<?php echo '?page=course_form&id=' . $result->id ?>">Edit</a> |</span>
+                                                <span class="delete"><a class="submitdelete" href="<?php echo '?page=course_form&action=delete&id=' . $result->id ?>">Delete</a></span>
                                             </div>
                                         </td>
                                         <td class="column-course-code"><?php echo $result->course_code; ?></td>

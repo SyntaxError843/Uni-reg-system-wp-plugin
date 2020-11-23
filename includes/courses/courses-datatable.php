@@ -10,7 +10,8 @@ function create_courses_datatable() {
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             course_code varchar(255) NOT NULL,
             course_name varchar(255) NOT NULL,
-            PRIMARY KEY (id)
+            PRIMARY KEY (id),
+            CONSTRAINT courses_unique UNIQUE (course_code)
         )";
 
     maybe_create_table( $table_name, $sql );

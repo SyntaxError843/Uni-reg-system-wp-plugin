@@ -17,7 +17,8 @@ function create_students_datatable() {
             student_password varchar(255) NOT NULL,
             date_of_birth datetime NOT NULL,
             date_created datetime DEFAULT NOW() NOT NULL,
-            PRIMARY KEY (id)
+            PRIMARY KEY (id),
+            CONSTRAINT students_unique UNIQUE (student_code)
         )";
 
     maybe_create_table( $table_name, $sql );

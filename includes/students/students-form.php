@@ -8,8 +8,8 @@
 function student_form_html() {
     $result = get_student_if_updating();
 
-    if( is_null($result) ) {
-        echo '<div class="wrap"><h1>Student not found</h1></div>';
+    if( is_null( $result ) ) {
+        echo '<div class="wrap"><h1>Student Not Found</h1></div>';
         exit;
     }
 
@@ -18,7 +18,7 @@ function student_form_html() {
             <div class="wrap">
                 <h1>Delete Student</h1><hr />
                 <form method="POST" action="#">
-                    <p>Are you sure you want to delete <strong><?php echo $result->first_name . ' ' . $result->last_name ?></strong>?</p>
+                    <p>Are you sure you want to delete <strong><?php echo $result->first_name . ' ' . $result->father_name[0] . '. ' . $result->last_name . ' (' . $result->student_code . ')' ?></strong>?</p>
 
                     <?php submit_button( __( 'Delete Student' ), 'primary', 'student-delete-confirm', true, array( 'style' => 'background: #DC3232; color: #fff; border: 1px solid #DC3232; margin-left: 13px;' ) ); ?>
                 </form>
@@ -40,7 +40,8 @@ function student_form_html() {
 
         if( $result ) {
             ?>
-                <h1>Edit Student</h1><h3><?php echo $result->first_name . ' ' . $result->last_name ?></h3>
+                <h1>Edit Student</h1>
+                <h3><?php echo $result->first_name . ' ' . $result->father_name[0] . '. ' . $result->last_name . ' (' . $result->student_code . ')' ?></h3>
             <?php
         } else {
             ?>
@@ -195,7 +196,7 @@ function student_form_html() {
         <div class="tablenav bottom">
 			<div class="alignleft actions">
                 <?php           
-                    submit_button( $result ? __( 'Update Student' ) : __( 'Add New Student' ), 'primary', 'student-form-submit', false );         
+                    submit_button( $result ? __( 'Update Student' ) : __( 'Add Student' ), 'primary', 'student-form-submit', false );         
                     if ( $result ) submit_button( __( 'Delete Student' ), 'primary', 'student-delete-submit', false, array( 'style' => 'background: #DC3232; color: #fff; border: 1px solid #DC3232; margin-left: 13px;' ) );
                 ?>
             </div>
@@ -219,12 +220,12 @@ function student_form_html() {
 function get_student_if_updating() {
     $result = '';
 
-    if( isset( $_GET['student_id'] ) && $_GET['student_id'] !== '' ) {
+    if( isset( $_GET['id'] ) && $_GET['id'] !== '' ) {
         // echo "<script>console.log('ass');</script>";
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'students';
-        $sql = $wpdb->prepare( "SELECT * FROM `$table_name` WHERE id = %d", (int) $_GET['student_id'] );
+        $sql = $wpdb->prepare( "SELECT * FROM `$table_name` WHERE id = %d", (int) $_GET['id'] );
         $result = $wpdb->get_row( $sql );
     }
 
@@ -236,28 +237,45 @@ function get_student_if_updating() {
  */
 function validate_student_form()
     {        
+        global $wpdb;
+        
         $errors = new WP_Error();
+        $students_table = $wpdb->prefix . 'students';
 
-        if ( isset($_POST[ 'student_code' ]) && $_POST[ 'student_code' ] == '' ) {
+        if ( isset($_POST['student_code']) && $_POST['student_code'] == '' ) {
             $errors->add('student_code', 'Sorry, Student Code field is required.');
         }
-        if ( isset($_POST[ 'first_name' ]) && $_POST[ 'first_name' ] == '' ) {
+        if ( isset($_POST['first_name']) && $_POST['first_name'] == '' ) {
             $errors->add('first_name', 'Sorry, First Name field is required.');
         }
-        if ( isset($_POST[ 'father_name' ]) && $_POST[ 'father_name' ] == '' ) {
+        if ( isset($_POST['father_name']) && $_POST['father_name'] == '' ) {
             $errors->add('father_name', 'Sorry, Father Name field is required.');
         }
-        if ( isset($_POST[ 'last_name' ]) && $_POST[ 'last_name' ] == '' ) {
+        if ( isset($_POST['last_name']) && $_POST['last_name'] == '' ) {
             $errors->add('last_name', 'Sorry, Last Name field is required.');
         }
-        if ( isset($_POST[ 'student_password' ]) && $_POST[ 'student_password' ] == '' && ! isset( $_GET['student_id'] ) ) {
+        if ( isset($_POST['student_password']) && $_POST['student_password'] == '' && ! isset( $_GET['id'] ) ){
             $errors->add('student_password', 'Sorry, Password field is required.');
         }
-        if ( isset($_POST[ 'date_of_birth' ]) && $_POST[ 'date_of_birth' ] == '' ) {
+        if ( isset($_POST['date_of_birth']) && $_POST['date_of_birth'] == '' ) {
             $errors->add('date_of_birth', 'Sorry, Date of Birth field is required.');
         }
-        if ( isset($_POST[ 'date_of_birth' ]) && $_POST[ 'date_of_birth' ] >= date("Y-m-d") ) {
+        if ( isset($_POST['date_of_birth']) && $_POST['date_of_birth'] >= date("Y-m-d") ) {
             $errors->add('date_of_birth', 'Sorry, Student can\'t be born today (or in the future).');
+        }
+
+        if( ! isset( $_GET['id'] ) && isset( $_POST['student_code'] ) && $_POST['student_code'] !== '' ) {
+            
+            $query = $wpdb->prepare( "SELECT student_code
+                                      FROM $students_table
+                                      WHERE `student_code` = %s", array( $_POST['student_code'] ) );
+
+            $result = $wpdb->get_var( $query );
+
+            if ( $result ) {
+                $msg = sprintf( "Sorry, Student Code <strong>%s</strong> already exists.", $result );
+                $errors->add( "student_code_exists", $msg );
+            }
         }
 
        return $errors;
@@ -282,7 +300,7 @@ function student_form_message()
             ?>
                 <div class="notice notice-info is-dismissible inline">
                     <p>
-                        <?php echo isset( $_GET['student_id'] ) ? 'Student updated successfully!' : 'Student added successfully!' ?>
+                        <?php echo isset( $_GET['id'] ) && $_GET['id'] !== '' ? 'Student updated successfully!' : 'Student added successfully!' ?>
                     </p>
                 </div>
             <?php
@@ -295,11 +313,11 @@ function student_form_message()
         } else {
             if (is_wp_error($errors) && !empty($errors->errors)) {
                 $error_messages = $errors->get_error_messages();
-                foreach ($error_messages as $k => $message) {
+                foreach ($error_messages as $message) {
                     ?>
                         <div class="notice notice-error inline">
                             <p>
-                                <?php echo '<p>' . $message . '</p>' ?>
+                                <?php echo $message ?>
                             </p>
                         </div>
                     <?php
@@ -317,8 +335,7 @@ function handle_student_form_post_requests() {
 
         global $errors;
         global $wpdb;
-    
-        $result = get_student_if_updating();
+
         $table_name = $wpdb->prefix . 'students';
         $errors = validate_student_form();
             
@@ -333,7 +350,7 @@ function handle_student_form_post_requests() {
                 'date_of_birth' => $_POST['date_of_birth'],
                 );
 
-            if ( ! $result ) {
+            if ( ! isset( $_GET['id'] ) || $_GET['id'] == '' ) {
                 $args['student_code'] = sanitize_student_form_text_field($_POST['student_code']);
                 $args['student_password'] = wp_hash_password($_POST['student_password']);
                 
@@ -351,9 +368,9 @@ function handle_student_form_post_requests() {
                 $record = wp_parse_args( $args, $default );
             }
                 
-            if ( $result && $_POST[ 'student_password' ] !== '' ) $args['student_password'] = wp_hash_password($_POST['student_password']);
+            if ( isset($_GET['id'] ) && $_GET['id'] !== '' && $_POST['student_password'] !== '' ) $args['student_password'] = wp_hash_password($_POST['student_password']);
               
-            $result ? $wpdb->update( $table_name, $args, array( 'id' => $result->id ) ) : $wpdb->insert( $table_name, $record );
+            isset( $_GET['id'] ) && $_GET['id'] !== '' ? $wpdb->update( $table_name, $args, array( 'id' => $_GET['id'] ) ) : $wpdb->insert( $table_name, $record );
                 
         } else {
             return $errors;
@@ -361,18 +378,16 @@ function handle_student_form_post_requests() {
 
     } elseif ( isset( $_POST['student-delete-submit'] ) ) {
 
-        $result = get_student_if_updating();
-        wp_redirect( '?page=student_form&action=delete&student_id=' . $result->id );
+        wp_redirect( '?page=student_form&action=delete&id=' . $_GET['id'] );
   
     } elseif ( isset( $_POST['student-delete-confirm'] ) ) {
 
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'students';
-        $result = get_student_if_updating();
         $success = 'false';
 
-        if ( $wpdb->delete( $table_name, array( 'id' => $result->id ) ) ) $success = 'true';
+        if ( $wpdb->delete( $table_name, array( 'id' => $_GET['id'] ) ) ) $success = 'true';
 
         wp_redirect( '?page=students_list&action=delete&success=' . $success );
 

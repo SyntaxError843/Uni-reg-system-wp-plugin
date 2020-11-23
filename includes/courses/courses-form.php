@@ -8,8 +8,8 @@
 function course_form_html() {
     $result = get_course_if_updating();
 
-    if( is_null($result) ) {
-        echo '<div class="wrap"><h1>Course not found</h1></div>';
+    if( is_null( $result ) ) {
+        echo '<div class="wrap"><h1>Course Not Found</h1></div>';
         exit;
     }
 
@@ -18,7 +18,7 @@ function course_form_html() {
             <div class="wrap">
                 <h1>Delete Course</h1><hr />
                 <form method="POST" action="#">
-                    <p>Are you sure you want to delete <strong><?php echo $result->course_name ?></strong>?</p>
+                    <p>Are you sure you want to delete <strong><?php echo $result->course_name . ' (' . $result->course_code . ')' ?></strong>?</p>
 
                     <?php submit_button( __( 'Delete Course' ), 'primary', 'course-delete-confirm', true, array( 'style' => 'background: #DC3232; color: #fff; border: 1px solid #DC3232; margin-left: 13px;' ) ); ?>
                 </form>
@@ -40,7 +40,8 @@ function course_form_html() {
 
         if( $result ) {
             ?>
-                <h1>Edit Course</h1><h3><?php echo $result->course_name ?></h3>
+                <h1>Edit Course</h1>
+                <h3><?php echo $result->course_name . ' (' . $result->course_code . ')' ?></h3>
             <?php
         } else {
             ?>
@@ -95,7 +96,7 @@ function course_form_html() {
         <div class="tablenav bottom">
 			<div class="alignleft actions">
                 <?php           
-                    submit_button( $result ? __( 'Update Course' ) : __( 'Add New Course' ), 'primary', 'course-form-submit', false );         
+                    submit_button( $result ? __( 'Update Course' ) : __( 'Add Course' ), 'primary', 'course-form-submit', false );         
                     if ( $result ) submit_button( __( 'Delete Course' ), 'primary', 'course-delete-submit', false, array( 'style' => 'background: #DC3232; color: #fff; border: 1px solid #DC3232; margin-left: 13px;' ) );
                 ?>
             </div>
@@ -119,12 +120,12 @@ function course_form_html() {
 function get_course_if_updating() {
     $result = '';
 
-    if( isset( $_GET['course_id'] ) && $_GET['course_id'] !== '' ) {
+    if( isset( $_GET['id'] ) && $_GET['id'] !== '' ) {
         // echo "<script>console.log('ass');</script>";
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'courses';
-        $sql = $wpdb->prepare( "SELECT * FROM `$table_name` WHERE id = %d", (int) $_GET['course_id'] );
+        $sql = $wpdb->prepare( "SELECT * FROM `$table_name` WHERE id = %d", (int) $_GET['id'] );
         $result = $wpdb->get_row( $sql );
     }
 
@@ -136,13 +137,30 @@ function get_course_if_updating() {
  */
 function validate_course_form()
     {        
+        global $wpdb;
+        
         $errors = new WP_Error();
+        $courses_table = $wpdb->prefix . 'courses';
 
-        if ( isset($_POST[ 'course_code' ]) && $_POST[ 'course_code' ] == '' ) {
+        if ( isset($_POST['course_code']) && $_POST['course_code'] == '' ) {
             $errors->add('course_code', 'Sorry, Course Code field is required.');
         }
-        if ( isset($_POST[ 'course_name' ]) && $_POST[ 'course_name' ] == '' ) {
+        if ( isset($_POST['course_name']) && $_POST['course_name'] == '' ) {
             $errors->add('course_name', 'Sorry, Course Name field is required.');
+        }
+
+        if( ! isset($_GET['id']) && isset($_POST['course_code']) && $_POST['course_code'] !== '' ) {
+            
+            $query = $wpdb->prepare( "SELECT course_code
+                                      FROM $courses_table
+                                      WHERE `course_code` = %s", array( $_POST['course_code'] ) );
+
+            $result = $wpdb->get_var( $query );
+
+            if ( $result ) {
+                $msg = sprintf( "Sorry, Course Code <strong>%s</strong> already exists.", $result );
+                $errors->add( "course_code_exists", $msg );
+            }
         }
 
        return $errors;
@@ -167,7 +185,7 @@ function course_form_message()
             ?>
                 <div class="notice notice-info is-dismissible inline">
                     <p>
-                        <?php echo isset( $_GET['course_id'] ) ? 'Course updated successfully!' : 'Course added successfully!' ?>
+                        <?php echo isset( $_GET['id'] ) && $_GET['id'] !== '' ? 'Course updated successfully!' : 'Course added successfully!' ?>
                     </p>
                 </div>
             <?php
@@ -180,11 +198,11 @@ function course_form_message()
         } else {
             if (is_wp_error($errors) && !empty($errors->errors)) {
                 $error_messages = $errors->get_error_messages();
-                foreach ($error_messages as $k => $message) {
+                foreach ($error_messages as $message) {
                     ?>
                         <div class="notice notice-error inline">
                             <p>
-                                <?php echo '<p>' . $message . '</p>' ?>
+                                <?php echo $message ?>
                             </p>
                         </div>
                     <?php
@@ -202,8 +220,7 @@ function handle_course_form_post_requests() {
 
         global $errors;
         global $wpdb;
-    
-        $result = get_course_if_updating();
+
         $table_name = $wpdb->prefix . 'courses';
         $errors = validate_course_form();
             
@@ -213,7 +230,7 @@ function handle_course_form_post_requests() {
                 'course_name' => ucfirst(sanitize_course_form_text_field($_POST['course_name'])),
                 );
 
-            if ( ! $result ) {
+            if ( ! isset( $_GET['id'] ) || $_GET['id'] == '' ) {
                 $args['course_code'] = sanitize_course_form_text_field($_POST['course_code']);
                 
                 $default = array(
@@ -224,7 +241,7 @@ function handle_course_form_post_requests() {
                 $record = wp_parse_args( $args, $default );
             }
               
-            $result ? $wpdb->update( $table_name, $args, array( 'id' => $result->id ) ) : $wpdb->insert( $table_name, $record );
+            isset( $_GET['id'] ) && $_GET['id'] !== '' ? $wpdb->update( $table_name, $args, array( 'id' => $_GET['id'] ) ) : $wpdb->insert( $table_name, $record );
                 
         } else {
             return $errors;
@@ -232,18 +249,16 @@ function handle_course_form_post_requests() {
 
     } elseif ( isset( $_POST['course-delete-submit'] ) ) {
 
-        $result = get_course_if_updating();
-        wp_redirect( '?page=course_form&action=delete&course_id=' . $result->id );
+        wp_redirect( '?page=course_form&action=delete&id=' . $_GET['id'] );
   
     } elseif ( isset( $_POST['course-delete-confirm'] ) ) {
 
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'courses';
-        $result = get_course_if_updating();
         $success = 'false';
 
-        if ( $wpdb->delete( $table_name, array( 'id' => $result->id ) ) ) $success = 'true';
+        if ( $wpdb->delete( $table_name, array( 'id' => $_GET['id'] ) ) ) $success = 'true';
 
         wp_redirect( '?page=courses_list&action=delete&success=' . $success );
 
