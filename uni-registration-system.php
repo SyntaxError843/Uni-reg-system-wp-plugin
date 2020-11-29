@@ -26,6 +26,7 @@ require_once UNIREGSYS_DIR . 'includes/students/students-form.php';
 
 require_once UNIREGSYS_DIR . 'includes/courses/courses-datatable.php';
 require_once UNIREGSYS_DIR . 'includes/courses/courses-list.php';
+require_once UNIREGSYS_DIR . 'includes/courses/courses-list-using-wp-list-table.php';
 require_once UNIREGSYS_DIR . 'includes/courses/courses-form.php';
 
 require_once UNIREGSYS_DIR . 'includes/registrations/registrations-datatable.php';
@@ -113,7 +114,7 @@ function uni_reg_system_registrations_form_handler() {
 
 function uni_reg_system_students_list_handler() {
     // students_list_html();
-    student_render_list_page();
+    students_render_list_page();
 }
 
 function uni_reg_system_student_form_handler() {
@@ -121,7 +122,8 @@ function uni_reg_system_student_form_handler() {
 }
 
 function uni_reg_system_courses_list_handler() {
-    courses_list_html();
+    // courses_list_html();
+    courses_render_list_page();
 }
 
 function uni_reg_system_course_form_handler() {
