@@ -92,7 +92,7 @@ class Courses_List_Table extends WP_List_Table {
     function get_bulk_actions() {
         $actions = array(
 
-            'delete'    => 'Delete',
+            'bulk_delete'    => 'Delete',
 
         );
 
@@ -101,8 +101,8 @@ class Courses_List_Table extends WP_List_Table {
 
     function process_bulk_action() {
         
-        //Detect when a bulk action is being triggered...
-        if( 'delete' === $this->current_action() ) {
+        // Detect when a bulk action is being triggered...
+        if( 'bulk_delete' === $this->current_action() ) {
             wp_die('Courses deleted! (or they would be if i actually coded this in... lets just pretend for now :D)');
         }
         
@@ -160,6 +160,25 @@ function courses_render_list_page(){
     $coursesListTable->prepare_items();
     
     ?>
+
+    <?php
+        if ( isset( $_GET['action'] ) && $_GET['action'] === 'delete' ) {
+            if ( isset( $_GET['success'] ) && $_GET['success'] === 'true' ) {
+                ?>
+                    <div class="notice notice-info is-dismissible inline">
+                        <p>Course Deleted Successfully!</p>
+                    </div>
+                <?php
+            } else {
+                ?>
+                    <div class="notice notice-error inline">
+                        <p>Something Went Wrong!</p>
+                    </div>
+                <?php
+            }
+        }
+    ?>
+
     <div class="wrap">
         
         <h1 class="wp-heading-inline">Courses List</h1><a href="?page=course_form" class="page-title-action">Add New</a><hr />
