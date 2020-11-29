@@ -21,6 +21,7 @@ define( 'UNIREGSYS_DIR', trailingslashit( plugin_dir_path( __FILE__ ) ) );
 
 require_once UNIREGSYS_DIR . 'includes/students/students-datatable.php';
 require_once UNIREGSYS_DIR . 'includes/students/students-list.php';
+require_once UNIREGSYS_DIR . 'includes/students/students-list-using-wp-list-table.php';
 require_once UNIREGSYS_DIR . 'includes/students/students-form.php';
 
 require_once UNIREGSYS_DIR . 'includes/courses/courses-datatable.php';
@@ -111,7 +112,8 @@ function uni_reg_system_registrations_form_handler() {
 }
 
 function uni_reg_system_students_list_handler() {
-    students_list_html();
+    // students_list_html();
+    student_render_list_page();
 }
 
 function uni_reg_system_student_form_handler() {
