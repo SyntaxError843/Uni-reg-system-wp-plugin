@@ -35,11 +35,6 @@ class Courses_List_Table extends WP_List_Table {
     function column_default( $result, $column_name ) {
         switch( $column_name ) {
             case 'course_code':
-            case 'phone_number':
-            case 'email':
-            case 'course_password':
-            case 'date_of_birth':
-            case 'date_created':
                 return $result->$column_name;
 
             default:
