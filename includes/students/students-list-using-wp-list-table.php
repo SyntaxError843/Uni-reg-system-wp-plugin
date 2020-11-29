@@ -74,7 +74,7 @@ class Students_List_Table extends WP_List_Table {
         //Return the student's full name
         return sprintf(
 
-            '%1$s %2$s. %3$s <span style="color:silver">(id:%4$s)</span>%5$s',
+            '<strong>%1$s %2$s. %3$s</strong> <span style="color:silver">(id:%4$s)</span>%5$s',
             /*$1%s*/ $result->first_name,
             /*$2%s*/ $result->father_name[0],
             /*$3%s*/ $result->last_name,
