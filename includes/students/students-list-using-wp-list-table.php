@@ -164,7 +164,7 @@ class Students_List_Table extends WP_List_Table {
 
 }
 
-function student_render_list_page(){
+function students_render_list_page(){
     
     //Create an instance of our package class...
     $studentsListTable = new Students_List_Table();
